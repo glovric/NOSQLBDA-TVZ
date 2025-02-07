@@ -18,7 +18,7 @@ const columnsContinuous = [
     "Temperature, degrees Celsius (Maximum)"
 ]
 
-const columnsCategorical = []
+const columnsCategorical = ["married", "education"];
 
 const missingContinuousCondition = columnsContinuous.map(c => ({
     "$or": [
@@ -76,38 +76,66 @@ async function updateMissingValues(collection) {
 
 async function createStatisticsContinuous(collection, collection_new) {
 
-        const cursor = collection.find();
-        const data = await cursor.toArray();
-        const newDocument = {"mean": {}, "std": {}, "nomissing": {}};
-        
-        for(let c of columnsContinuous) {
-            let meanCurrent = 0;
+    const cursor = collection.find();
+    const data = await cursor.toArray();
+    const newDocument = {"mean": {}, "std": {}, "nomissing": {}};
+    
+    for(let c of columnsContinuous) {
+        let meanCurrent = 0;
 
-            for(let d of data) {
-                meanCurrent += d[c];
+        for(let d of data) {
+            meanCurrent += d[c];
+        }
+
+        meanCurrent /= data.length;
+        newDocument["mean"][c] = meanCurrent;
+    }
+
+    for(let c of columnsContinuous) {
+        let std_current = 0;
+
+        for(let d of data) {
+            std_current += (d[c] - newDocument["mean"][c])**2;
+        }
+
+        std_current /= data.length;
+        std_current = Math.sqrt(std_current);
+        newDocument["std"][c] = std_current;
+    }
+
+    for(let c of columnsContinuous) {
+        newDocument["nomissing"][c] = data.length;
+    }
+
+    await collection_new.insertOne(newDocument);
+}
+
+async function createFrequenciesCategorical(collection, collection_new) {
+
+    const cursor = collection.find();
+    const data = await cursor.toArray();
+
+    for (let c of columnsCategorical) {
+
+        for (let d of data) {
+
+            const categoryValue = d[c];
+
+            if (categoryValue !== null && categoryValue !== undefined) {
+
+                await collection_new.updateOne(
+                    { _id: 'frequencies' },
+                    { 
+                        $inc: { [`frequencies.${c}.${categoryValue}`]: 1 } 
+                    },
+                    { upsert: true }  // Create the document if it doesn't exist
+                );
+
             }
+    }
 
-            meanCurrent /= data.length;
-            newDocument["mean"][c] = meanCurrent;
-        }
+}
 
-        for(let c of columnsContinuous) {
-            let std_current = 0;
-
-            for(let d of data) {
-                std_current += (d[c] - newDocument["mean"][c])**2;
-            }
-
-            std_current /= data.length;
-            std_current = Math.sqrt(std_current);
-            newDocument["std"][c] = std_current;
-        }
-
-        for(let c of columnsContinuous) {
-            newDocument["nomissing"][c] = data.length;
-        }
-
-        await collection_new.insertOne(newDocument);
 }
 
 async function main() {
@@ -141,6 +169,11 @@ async function main() {
         console.log("Creating statistics for the dataset.");
         const statistics = db.collection("statistika_weather_dataset");
         await createStatisticsContinuous(collection, statistics);
+
+        // 3. Calculating frequencies of categorical variables
+        console.log("Creating frequencies for the dataset.");
+        const frequencies = db.collection("frekvencije_weather_dataset");
+        await createFrequenciesCategorical(collection, frequencies);
 
     } finally {
         if (client) {
