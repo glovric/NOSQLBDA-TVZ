@@ -74,35 +74,75 @@ async function updateMissingValues(collection) {
     }
 }
 
-async function run() {
+async function createStatisticsContinuous(collection, collection_new) {
+
+        const cursor = collection.find();
+        const data = await cursor.toArray();
+        const newDocument = {"mean": {}, "std": {}, "nomissing": {}};
+        
+        for(let c of columnsContinuous) {
+            let meanCurrent = 0;
+
+            for(let d of data) {
+                meanCurrent += d[c];
+            }
+
+            meanCurrent /= data.length;
+            newDocument["mean"][c] = meanCurrent;
+        }
+
+        for(let c of columnsContinuous) {
+            let std_current = 0;
+
+            for(let d of data) {
+                std_current += (d[c] - newDocument["mean"][c])**2;
+            }
+
+            std_current /= data.length;
+            std_current = Math.sqrt(std_current);
+            newDocument["std"][c] = std_current;
+        }
+
+        for(let c of columnsContinuous) {
+            newDocument["nomissing"][c] = data.length;
+        }
+
+        await collection_new.insertOne(newDocument);
+}
+
+async function main() {
 
     try {
 
+        // Connect to Mongo, database and collection
         await client.connect();
         console.log('Connected to MongoDB.');
-
         const db = client.db('NOSQL');
         const collection = db.collection('weather_dataset');
 
-        // 1.
+        // 1. Updating missing values
         console.log("Finding missing values...");
-
         const missing = await getMissingValues(collection);
+
         if(missing.length > 0) {
+
             for(let doc of missing) {
                 console.log(doc);
             }
+            console.log("Updating missing values.")
+            await updateMissingValues(collection);
+
         }
         else {
             console.log("No missing values.");
         }
 
-        await updateMissingValues(collection);
-
-
+        // 2. Finding mean, standard deviation, creating a new document
+        console.log("Creating statistics for the dataset.");
+        const statistics = db.collection("statistika_weather_dataset");
+        await createStatisticsContinuous(collection, statistics);
 
     } finally {
-        // Close the MongoDB connection
         if (client) {
             await client.close();
             console.log("MongoDB connection closed.");
@@ -110,4 +150,4 @@ async function run() {
     }
 }
 
-run().catch(console.error);
+main().catch(console.error);
