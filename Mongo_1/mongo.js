@@ -139,6 +139,56 @@ async function createFrequenciesCategorical(collection, collection_new) {
 
 }
 
+async function createLessThanMeansContinuous(collection, collection_statistics, collection_statistics1) {
+
+        const cursor = collection.find();
+        const data = await cursor.toArray();
+
+        const cursor_statistics = collection_statistics.find();
+        const statistics_data = await cursor_statistics.toArray();
+        const means = statistics_data[0]["mean"];
+
+        const statistics_1_object = {}
+
+        for (let c of columnsContinuous) {
+            statistics_1_object[c] = {"mean": means[c], "values": {}}
+            let i = 0;
+            for (let d of data) {
+                if (d[c] <= means[c]) {
+                    statistics_1_object[c]["values"][i] = d[c];
+                    i += 1;
+                }
+            }
+        }
+
+        await collection_statistics1.insertOne(statistics_1_object);
+}
+
+async function createGreaterThanMeansContinuous(collection, collection_statistics, collection_statistics2) {
+
+    const cursor = collection.find();
+    const data = await cursor.toArray();
+
+    const cursor_statistics = collection_statistics.find();
+    const statistics_data = await cursor_statistics.toArray();
+    const means = statistics_data[0]["mean"];
+
+    const statistics_2_object = {}
+
+    for (let c of columnsContinuous) {
+        statistics_2_object[c] = {"mean": means[c], "values": {}}
+        let i = 0;
+        for (let d of data) {
+            if (d[c] > means[c]) {
+                statistics_2_object[c]["values"][i] = d[c];
+                i += 1;
+            }
+        }
+    }
+
+    await collection_statistics2.insertOne(statistics_2_object);
+}
+
 async function main() {
 
     try {
@@ -175,6 +225,12 @@ async function main() {
         console.log("Creating frequencies for the dataset.");
         const frequencies = db.collection("frekvencije_weather_dataset");
         await createFrequenciesCategorical(collection, frequencies);
+
+        // 4. New documents with continuous values
+        const statistics_1 = db.collection("statistika1_weather_dataset");
+        const statistics_2 = db.collection("statistika2_weather_dataset");
+        await createLessThanMeansContinuous(collection, statistics, statistics_1);
+        await createGreaterThanMeansContinuous(collection, statistics, statistics_2);
 
     } finally {
         if (client) {
