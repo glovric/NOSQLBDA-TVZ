@@ -186,38 +186,42 @@ async function createGreaterThanMeansContinuous(collection, collection_statistic
     await collection_statistics2.insertOne(statistics_2_object);
 }
 
-async function sesta() {
+async function embedCategorical(collection, collection_categorical, collection_new) {
+
     const all_data = await collection.find().toArray();
-        const dataset_new_sheet = db.collection("emb2_weather_dataset");
+    const categorical_data = await collection_categorical.find().toArray();
+    const data = categorical_data[0];
 
-        const statistics_data = await statistics.find().toArray();
-        const data = statistics_data[0];
+    for(let doc of all_data) { // rows
 
-        for(let doc of all_data) { // rows
+        doc["categories"] = {}; // init empty json
 
-            doc["statistics"] = {}; // init empty json
-
-            for(let c of columnsContinuous) { // iterate columns
-                doc["statistics"][c] = {};
-
-                for(let statistic in data) { // mean, std, nomissing
-
-                    if(statistic === '_id') {
-                        continue;
-                    }
-    
-                    for(let inner_key in data[statistic]) {
-                        if(inner_key !== c) {
-                            continue;
-                        }
-                        doc["statistics"][c][statistic] = data[statistic][inner_key];
-                    }
-                }
-            }
-
-            await dataset_new_sheet.insertOne(doc);
-
+        for(let c of columnsCategorical) { // iterate columns
+            doc["categories"][c] = data[c];
         }
+
+        await collection_new.insertOne(doc);
+
+    }
+}
+
+async function embedContinuous(collection, collection_statistics, collection_new) {
+
+    const all_data = await collection.find().toArray();
+    const statistics_data = await collection_statistics.find().toArray();
+    const data = statistics_data[0];
+
+    for(let doc of all_data) { // rows
+
+        doc["statistics"] = {}; // init empty json
+
+        for(let c of columnsContinuous) { // iterate columns
+            doc["statistics"][c] = data[c];
+        }
+
+        await collection_new.insertOne(doc);
+
+    }
 }
 
 async function main() {
@@ -261,12 +265,16 @@ async function main() {
         console.log("Creating documents with values lesser than and greater than means.");
         const statistics_1 = db.collection("statistika1_weather_dataset");
         const statistics_2 = db.collection("statistika2_weather_dataset");
-        await createLessThanMeansContinuous(collection, statistics, statistics_1);
-        await createGreaterThanMeansContinuous(collection, statistics, statistics_2);
+        //await createLessThanMeansContinuous(collection, statistics, statistics_1);
+        //await createGreaterThanMeansContinuous(collection, statistics, statistics_2);
 
         // 5. Embedding frequencies
+        const embed = db.collection("emb_weather_dataset");
+        //await embedCategorical(collection, frequencies, embed);
 
         // 6. Embedding statistics
+        const embed_2 = db.collection("emb2_weather_dataset");
+        //await embedContinuous(collection, statistics, embed_2);
 
 
     } finally {
