@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const url = 'mongodb://localhost:27017';
 
@@ -114,6 +114,7 @@ async function createFrequenciesCategorical(collection, collection_new) {
 
     const cursor = collection.find();
     const data = await cursor.toArray();
+    const id = new ObjectId();
 
     for (let c of columnsCategorical) {
 
@@ -124,11 +125,11 @@ async function createFrequenciesCategorical(collection, collection_new) {
             if (categoryValue !== null && categoryValue !== undefined) {
 
                 await collection_new.updateOne(
-                    { _id: 'frequencies' },
+                    { _id: id },
                     { 
-                        $inc: { [`frequencies.${c}.${categoryValue}`]: 1 } 
+                        $inc: { [`${c}.${categoryValue}`]: 1 } 
                     },
-                    { upsert: true }  // Create the document if it doesn't exist
+                    { upsert: true }
                 );
 
             }
