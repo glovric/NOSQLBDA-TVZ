@@ -60,7 +60,6 @@ module.exports = {
 
     dropCollections: async function (client, dbName, collections) {
         try {
-            // Connect to the MongoDB server
             await client.connect();
             const db = client.db(dbName);
             for(let c of collections) {
@@ -82,30 +81,27 @@ module.exports = {
         
             const results = [];
         
-            fs.createReadStream(collectionPath) // Path to your CSV file
-            .pipe(csv()) // Pipe CSV through the parser
+            fs.createReadStream(collectionPath)
+            .pipe(csv())
             .on('data', (data) => {
-                // Convert numeric values from strings to floats (or integers)
                 for (const key in data) {
                     if (data.hasOwnProperty(key)) {
-                        // Check if the value is a valid float
                         const numericValue = parseFloat(data[key]);
                         if (!isNaN(numericValue)) {
-                            data[key] = numericValue;  // Convert to float if valid
+                            data[key] = numericValue;
                         }
                     }
                 }
-                results.push(data); // Push each row into the results array
+                results.push(data);
             })
             .on('end', async () => {
                 try {
-                // Insert parsed data into MongoDB
                 const insertResult = await collection.insertMany(results);
                 console.log(`${insertResult.insertedCount} records inserted into ${collectionName}.`);
                 } catch (err) {
                 console.error('Error inserting data into MongoDB:', err);
                 } finally {
-                client.close(); // Close the MongoDB connection
+                client.close();
                 }
             });
             } catch (err) {
@@ -113,11 +109,13 @@ module.exports = {
             }
     },
 
+    // 1.
     getMissingValues: async function (collection) {
         const cursor = await collection.find({ "$or": missingConditions });
         return cursor.toArray();
     },
 
+    // 1.
     updateMissingValues: async function (collection) {
         const cursor = await collection.find({ "$or": missingConditions });
 
@@ -145,6 +143,7 @@ module.exports = {
         }
     },
 
+    // 2.
     createStatisticsContinuous: async function (collection, collection_new) {
         const cursor = collection.find();
         const data = await cursor.toArray();
@@ -175,12 +174,22 @@ module.exports = {
         }
 
         for (let c of columnsContinuous) {
-            newDocument[c]["nomissing"] = data.length;
-        }
+            let counterNoMissing = 0;
+
+            for(let d of data) {
+
+                if (d[c] !== null && d[c] !== NaN && d.hasOwnProperty(c)) {
+                    counterNoMissing += 1;
+                }
+
+                newDocument[c]["nomissing"] = counterNoMissing;
+            }
+        }   
 
         await collection_new.insertOne(newDocument);
     },
 
+    // 3.
     createFrequenciesCategorical: async function (collection, collection_new) {
         const cursor = collection.find();
         const data = await cursor.toArray();
@@ -203,6 +212,7 @@ module.exports = {
         }
     },
 
+    // 4.
     createLessThanMeansContinuous: async function (collection, collection_statistics, collection_statistics1) {
         const cursor = collection.find();
         const data = await cursor.toArray();
@@ -225,6 +235,7 @@ module.exports = {
         await collection_statistics1.insertOne(statistics_1_object);
     },
 
+    // 4.
     createGreaterThanMeansContinuous: async function (collection, collection_statistics, collection_statistics2) {
         const cursor = collection.find();
         const data = await cursor.toArray();
@@ -247,6 +258,7 @@ module.exports = {
         await collection_statistics2.insertOne(statistics_2_object);
     },
 
+    // 5.
     embedCategorical: async function (collection, collection_categorical, collection_new) {
         const all_data = await collection.find().toArray();
         const categorical_data = await collection_categorical.find().toArray();
@@ -263,6 +275,7 @@ module.exports = {
         }
     },
 
+    // 6.
     embedContinuous: async function (collection, collection_statistics, collection_new) {
         const all_data = await collection.find().toArray();
         const statistics_data = await collection_statistics.find().toArray();
@@ -279,6 +292,7 @@ module.exports = {
         }
     },
 
+    // 7.
     findStdBiggerThanMeans: async function (collection_emb2) {
         const embed_2_data = await collection_emb2.find().toArray();
         const embed_2_statistics = embed_2_data[0]["statistics"];
@@ -304,5 +318,22 @@ module.exports = {
                 { upsert: true }
             );
         }
+    },
+
+    // 8.
+    createIndexAndQuery: async function (collection) {
+        await collection.createIndex({
+            "Specific conductance (Maximum)": 1,
+            "pH, standard units (Maximum)": -1,
+            "Dissolved oxygen, milligrams per liter (Mean)": 1
+        })
+
+        const result = await collection.find({
+            "Specific conductance (Maximum)": { $gt: 0.5 },
+            "pH, standard units (Maximum)": { $lt: 1 },
+            "Dissolved oxygen, milligrams per liter (Mean)": { $gt: 0.01 }
+        }).toArray();
+
+        return result;
     }
 };
