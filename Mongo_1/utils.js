@@ -1,4 +1,7 @@
 const { ObjectId } = require('mongodb');
+const fs = require('fs');
+const csv = require('csv-parser');
+const path = require('path');
 
 const columnsContinuous = [
     "Specific conductance (Maximum)",
@@ -37,25 +40,60 @@ const missingConditions = [
     ...missingCategoricalCondition
 ];
 
-// Export all functions and constants
 module.exports = {
     columnsContinuous,
     columnsCategorical,
     missingConditions,
 
-    dropDatabase: async function (client) {
+    dropDatabase: async function (client, dbName) {
         try {
             await client.connect();
-            const db = client.db('NOSQL');  // Replace with your database name
-    
-            // Drop the database
+            const db = client.db(dbName);
             await db.dropDatabase();
-            console.log('Database dropped successfully');
+            console.log(`Database ${dbName} dropped successfully`);
         } catch (error) {
             console.error('Error dropping database:', error);
         } finally {
             await client.close();
         }
+    },
+
+    loadDatabase: async function (client, dbName, collectionName, collectionPath) {
+        try {       
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+        
+            const results = [];
+        
+            fs.createReadStream(collectionPath) // Path to your CSV file
+            .pipe(csv()) // Pipe CSV through the parser
+            .on('data', (data) => {
+                // Convert numeric values from strings to floats (or integers)
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        // Check if the value is a valid float
+                        const numericValue = parseFloat(data[key]);
+                        if (!isNaN(numericValue)) {
+                            data[key] = numericValue;  // Convert to float if valid
+                        }
+                    }
+                }
+                results.push(data); // Push each row into the results array
+            })
+            .on('end', async () => {
+                try {
+                // Insert parsed data into MongoDB
+                const insertResult = await collection.insertMany(results);
+                console.log(`${insertResult.insertedCount} records inserted into ${collectionName}.`);
+                } catch (err) {
+                console.error('Error inserting data into MongoDB:', err);
+                } finally {
+                client.close(); // Close the MongoDB connection
+                }
+            });
+            } catch (err) {
+                console.error('Error connecting to MongoDB:', err);
+            }
     },
 
     getMissingValues: async function (collection) {
