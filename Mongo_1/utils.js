@@ -1,7 +1,8 @@
 const { ObjectId } = require('mongodb');
 const fs = require('fs');
 const csv = require('csv-parser');
-const path = require('path');
+
+const url = 'mongodb://localhost:27017';
 
 const columnsContinuous = [
     "Specific conductance (Maximum)",
@@ -41,9 +42,8 @@ const missingConditions = [
 ];
 
 module.exports = {
-    columnsContinuous,
-    columnsCategorical,
-    missingConditions,
+
+    url,
 
     dropDatabase: async function (client, dbName) {
         try {
@@ -56,6 +56,23 @@ module.exports = {
         } finally {
             await client.close();
         }
+    },
+
+    dropCollections: async function (client, dbName, collections) {
+        try {
+            // Connect to the MongoDB server
+            await client.connect();
+            const db = client.db(dbName);
+            for(let c of collections) {
+                const collection = db.collection(c);
+                const result = await collection.drop();
+                console.log(`Collection ${c} dropped successfully:`, result);
+            }
+          } catch (err) {
+            console.error('Error dropping collection:', err);
+          } finally {
+            await client.close();
+          }  
     },
 
     loadDatabase: async function (client, dbName, collectionName, collectionPath) {

@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
-const { getMissingValues, 
+const { url,
+        getMissingValues, 
         updateMissingValues, 
         createStatisticsContinuous, 
         createFrequenciesCategorical, 
@@ -9,7 +10,6 @@ const { getMissingValues,
         embedContinuous, 
         findStdBiggerThanMeans } = require('./utils');
 
-const url = 'mongodb://localhost:27017';
 const client = new MongoClient(url);
 
 async function main() {
@@ -23,7 +23,7 @@ async function main() {
         const collection = db.collection('water_dataset');
 
         // 1. Updating missing values
-        console.log("1. Finding missing values...");
+        console.log("1. Finding missing values.");
         const missing = await getMissingValues(collection);
 
         if(missing.length > 0) {
