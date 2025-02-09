@@ -224,6 +224,34 @@ async function embedContinuous(collection, collection_statistics, collection_new
     }
 }
 
+async function findStdBiggerThanMeans(collection_emb2) {
+
+    const embed_2_data = await collection_emb2.find().toArray();
+    const embed_2_statistics = embed_2_data[0]["statistics"];
+
+    for(let c of columnsContinuous) {
+        let data = embed_2_statistics[c];
+        let mean = data["mean"];
+        let std = data["std"];
+
+        if(std === 0) {
+            continue;
+        }
+        if(std > mean * 0.10) {
+            data["std&mean10%"] = mean;
+            embed_2_statistics[c] = data;
+        }
+    }
+
+    for(let doc of embed_2_data) {
+        await collection_emb2.updateOne(
+            {"_id": doc["_id"]},
+            {$set: {"statistics": embed_2_statistics}},
+            {upsert: true},
+        )
+    }
+}
+
 async function main() {
 
     try {
@@ -254,14 +282,14 @@ async function main() {
         // 3. Calculating frequencies of categorical variables
         console.log("3. Creating frequencies for the dataset.");
         const frequencies = db.collection("frekvencije_weather_dataset");
-        await createFrequenciesCategorical(collection, frequencies);
+        //await createFrequenciesCategorical(collection, frequencies);
 
         // 4. New documents with continuous values
         console.log("4. Creating documents with values lesser than and greater than means.");
         const statistics_1 = db.collection("statistika1_weather_dataset");
         const statistics_2 = db.collection("statistika2_weather_dataset");
-        await createLessThanMeansContinuous(collection, statistics, statistics_1);
-        await createGreaterThanMeansContinuous(collection, statistics, statistics_2);
+        //await createLessThanMeansContinuous(collection, statistics, statistics_1);
+        //await createGreaterThanMeansContinuous(collection, statistics, statistics_2);
 
         // 5. Embedding frequencies
         console.log("5. Embedding frequencies.");
@@ -275,30 +303,7 @@ async function main() {
 
         // 7. Std, means
         console.log("7. Finding standard deviations 10% bigger than means.");
-        const embed_2_data = await embed_2.find().toArray();
-        const embed_2_statistics = embed_2_data[0]["statistics"];
-
-        for(let c of columnsContinuous) {
-            let data = embed_2_statistics[c];
-            let mean = data["mean"];
-            let std = data["std"];
-
-            if(std === 0) {
-                continue;
-            }
-            if(std > mean * 0.10) {
-                data["std&mean10%"] = mean;
-                embed_2_statistics[c] = data;
-            }
-        }
-
-        for(let doc of embed_2_data) {
-            await embed_2.updateOne(
-                {"_id": doc["_id"]},
-                {$set: {"statistics": embed_2_statistics}},
-                {upsert: true},
-            )
-        }
+        await findStdBiggerThanMeans(embed_2);
 
     } finally {
         if (client) {
