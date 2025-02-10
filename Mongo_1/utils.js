@@ -15,7 +15,8 @@ const columnsContinuous = [
     "Dissolved oxygen, milligrams per liter (Minimum)",
     "Temperature, degrees Celsius (Mean)",
     "Temperature, degrees Celsius (Minimum)",
-    "Temperature, degrees Celsius (Maximum)"
+    "Temperature, degrees Celsius (Maximum)",
+    "Target"
 ];
 
 const columnsCategorical = ["married", "education"];
