@@ -1,3 +1,18 @@
+# Prerequisites
+
+### 1. **MongoDB**
+
+[MongoDB Downloads](https://www.mongodb.com/try/download/community)
+
+### 2. **Node.js**
+[Node.js Downloads](https://nodejs.org/)
+
+### 3. **Python**
+[Python Downloads](https://www.python.org/downloads/)
+
+# Dataset
+[Water quality prediction](https://archive.ics.uci.edu/dataset/733/water+quality+prediction-1)
+
 # Installation
 
 ### 1. MongoDB (Node.js)
