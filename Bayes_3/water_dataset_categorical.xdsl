@@ -91,88 +91,88 @@
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>1088 375 1160 423</position>
-				<barchart active="true" width="128" height="72" />
+				<position>1097 388 1169 436</position>
+				<barchart active="true" width="146" height="99" />
 			</node>
 			<node id="pH__standard_units__Maximum_">
 				<name>pH, standard units (Maximum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>73 587 145 635</position>
-				<barchart active="true" width="128" height="72" />
+				<position>78 573 150 621</position>
+				<barchart active="true" width="158" height="99" />
 			</node>
 			<node id="pH__standard_units__Minimum_">
 				<name>pH, standard units (Minimum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>1042 41 1114 89</position>
-				<barchart active="true" width="128" height="72" />
+				<position>1052 53 1124 101</position>
+				<barchart active="true" width="149" height="97" />
 			</node>
 			<node id="Specific_conductance__Minimum_">
 				<name>Specific conductance (Minimum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>408 220 480 268</position>
-				<barchart active="true" width="128" height="72" />
+				<position>417 229 489 277</position>
+				<barchart active="true" width="147" height="91" />
 			</node>
 			<node id="Specific_conductance__Mean_">
 				<name>Specific conductance (Mean)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>319 550 391 598</position>
-				<barchart active="true" width="128" height="72" />
+				<position>324 562 396 610</position>
+				<barchart active="true" width="138" height="97" />
 			</node>
 			<node id="Dissolved_oxygen__Maximum_">
 				<name>Dissolved oxygen (Maximum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>647 52 719 100</position>
-				<barchart active="true" width="128" height="72" />
+				<position>652 62 724 110</position>
+				<barchart active="true" width="139" height="93" />
 			</node>
 			<node id="Dissolved_oxygen__Mean_">
 				<name>Dissolved oxygen (Mean)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>101 89 173 137</position>
-				<barchart active="true" width="128" height="72" />
+				<position>110 98 182 146</position>
+				<barchart active="true" width="147" height="91" />
 			</node>
 			<node id="Dissolved_oxygen__Minimum_">
 				<name>Dissolved oxygen (Minimum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>583 523 655 571</position>
-				<barchart active="true" width="128" height="72" />
+				<position>591 536 663 584</position>
+				<barchart active="true" width="145" height="99" />
 			</node>
 			<node id="Temperature__Mean_">
 				<name>Temperature (Mean)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>822 537 894 585</position>
-				<barchart active="true" width="128" height="72" />
+				<position>827 546 899 594</position>
+				<barchart active="true" width="139" height="90" />
 			</node>
 			<node id="Temperature__Minimum_">
 				<name>Temperature (Minimum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>135 355 207 403</position>
-				<barchart active="true" width="128" height="72" />
+				<position>148 365 220 413</position>
+				<barchart active="true" width="151" height="91" />
 			</node>
 			<node id="Temperature__Maximum_">
 				<name>Temperature (Maximum)</name>
 				<interior color="e5f6f7" />
 				<outline color="000080" />
 				<font color="000000" name="Arial" size="8" />
-				<position>1049 538 1121 586</position>
-				<barchart active="true" width="128" height="72" />
+				<position>1063 553 1135 601</position>
+				<barchart active="true" width="157" height="103" />
 			</node>
 			<node id="Target">
 				<name>Target</name>
