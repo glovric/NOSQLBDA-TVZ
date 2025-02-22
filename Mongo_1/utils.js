@@ -10,12 +10,12 @@ const columnsContinuous = [
     "pH, standard units (Minimum)",
     "Specific conductance (Minimum)",
     "Specific conductance (Mean)",
-    "Dissolved oxygen, milligrams per liter (Maximum)",
-    "Dissolved oxygen, milligrams per liter (Mean)",
-    "Dissolved oxygen, milligrams per liter (Minimum)",
-    "Temperature, degrees Celsius (Mean)",
-    "Temperature, degrees Celsius (Minimum)",
-    "Temperature, degrees Celsius (Maximum)",
+    "Dissolved oxygen (Maximum)",
+    "Dissolved oxygen (Mean)",
+    "Dissolved oxygen (Minimum)",
+    "Temperature (Mean)",
+    "Temperature (Minimum)",
+    "Temperature (Maximum)",
     "Target"
 ];
 
@@ -326,13 +326,13 @@ module.exports = {
         await collection.createIndex({
             "Specific conductance (Maximum)": 1,
             "pH, standard units (Maximum)": -1,
-            "Dissolved oxygen, milligrams per liter (Mean)": 1
+            "Dissolved oxygen (Mean)": 1
         })
 
         const result = await collection.find({
             "Specific conductance (Maximum)": { $gt: 0.5 },
             "pH, standard units (Maximum)": { $lt: 1 },
-            "Dissolved oxygen, milligrams per liter (Mean)": { $gt: 0.01 }
+            "Dissolved oxygen (Mean)": { $gt: 0.01 }
         }).toArray();
 
         return result;
